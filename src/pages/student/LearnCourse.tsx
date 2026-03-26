@@ -14,7 +14,7 @@ const LearnCourse = () => {
   const { data: enrollments } = useQuery({
     queryKey: ['enrollments', 'my'],
     queryFn: () => enrollmentsApi.getMyEnrollments({ pageSize: 100 }),
-    enabled: !!user,
+    enabled: !!user && user.role === 'Student',
   })
 
   const enrollment = enrollments?.items.find((e) => e.courseId === courseId)

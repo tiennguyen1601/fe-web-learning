@@ -9,7 +9,30 @@
       "Bash(find /d/FPT/Project/WebLearning/src/components -name *.tsx -o -name *.ts)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(dotnet ef:*)",
+      "Bash(taskkill /PID 13836 /F)",
+      "Bash(cmd.exe /c \"taskkill /PID 13836 /F\")",
+      "Bash(cmd.exe /c \"taskkill /PID 13836 /F 2>&1 && echo done\")",
+      "Bash(cmd.exe /c \"tasklist | findstr 13836\")",
+      "Bash(cmd.exe /c \"cd /d D:\\\\FPT\\\\Project\\\\LearningWeb && dotnet ef migrations add AddLessonIdToAssignment --project src/LearningWeb.Infrastructure --startup-project src/LearningWeb.API 2>&1\")",
+      "Bash(cmd.exe /c \"cd /d D:\\\\FPT\\\\Project\\\\LearningWeb && dotnet ef --version 2>&1\")",
+      "Bash(powershell -Command \"Stop-Process -Id 13836 -Force -ErrorAction SilentlyContinue; Write-Host ''done''\")",
+      "Bash(powershell -Command \"Stop-Process -Id 26304 -Force\")",
+      "Bash(powershell -Command \"Get-Process | Where-Object {$_ProcessName -like ''*dotnet*'' -or $_ProcessName -like ''*LearningWeb*''} | Select-Object Id, ProcessName, MainWindowTitle\")",
+      "Bash(powershell -Command \"Get-Process dotnet -ErrorAction SilentlyContinue | Select-Object Id, CPU\")",
+      "Bash(powershell -Command \"Stop-Process -Name dotnet -Force -ErrorAction SilentlyContinue\")",
+      "Bash(find d:/FPT/Project/LearningWeb -name *Exception*Middleware*)",
+      "Bash(find \"d:/FPT/Project/LearningWeb/src\" -name \"GetCourseStudentsQuery*.cs\" -exec cat {})"
+    ],
+    "additionalDirectories": [
+      "d:\\FPT\\Project\\LearningWeb\\src\\LearningWeb.Application\\Assignments\\Queries\\GetMyAssignments",
+      "d:\\FPT\\Project\\LearningWeb\\src\\LearningWeb.Application\\Admin\\Queries\\GetPendingCourses",
+      "D:\\FPT\\Project\\LearningWeb\\src\\LearningWeb.Domain\\Entities",
+      "D:\\FPT\\Project\\LearningWeb\\src\\LearningWeb.Application\\Assignments\\Commands\\CreateAssignment",
+      "D:\\FPT\\Project\\LearningWeb\\src\\LearningWeb.Application\\Assignments\\Queries\\GetAssignments",
+      "d:\\FPT\\Project\\LearningWeb\\src\\LearningWeb.Application\\Assignments\\Queries\\GetAssignmentById",
+      "d:\\FPT\\Project\\LearningWeb\\src\\LearningWeb.Application\\Assignments\\Commands"
     ]
   }
 }

@@ -20,6 +20,10 @@ const TeacherCourses = lazy(() => import('@/pages/teacher/TeacherCourses'))
 const CourseForm = lazy(() => import('@/pages/teacher/CourseForm'))
 const LessonsManager = lazy(() => import('@/pages/teacher/LessonsManager'))
 const AssignmentsManager = lazy(() => import('@/pages/teacher/AssignmentsManager'))
+const TeacherStudents = lazy(() => import('@/pages/teacher/TeacherStudents'))
+const TeacherDashboard = lazy(() => import('@/pages/teacher/TeacherDashboard'))
+const MyAssignments = lazy(() => import('@/pages/student/MyAssignments'))
+const AdminDashboard = lazy(() => import('@/pages/admin/AdminDashboard'))
 const DoAssignmentPage = lazy(() => import('@/pages/assignments/DoAssignmentPage'))
 const ConfirmEmail = lazy(() => import('@/pages/auth/ConfirmEmail'))
 const AdminUsers = lazy(() => import('@/pages/admin/AdminUsers'))
@@ -40,8 +44,16 @@ const routes = [
         element: wrap(<ProtectedRoute><MyLearning /></ProtectedRoute>),
       },
       {
+        path: '/my-assignments',
+        element: wrap(<ProtectedRoute><MyAssignments /></ProtectedRoute>),
+      },
+      {
         path: '/profile',
         element: wrap(<ProtectedRoute><Profile /></ProtectedRoute>),
+      },
+      {
+        path: '/teacher',
+        element: wrap(<ProtectedRoute role="Teacher"><TeacherDashboard /></ProtectedRoute>),
       },
       {
         path: '/teacher/courses',
@@ -63,7 +75,15 @@ const routes = [
         path: '/teacher/courses/:id/assignments',
         element: wrap(<ProtectedRoute role="Teacher"><AssignmentsManager /></ProtectedRoute>),
       },
+      {
+        path: '/teacher/courses/:id/students',
+        element: wrap(<ProtectedRoute role="Teacher"><TeacherStudents /></ProtectedRoute>),
+      },
       // Admin routes
+      {
+        path: '/admin',
+        element: wrap(<ProtectedRoute role="Admin"><AdminDashboard /></ProtectedRoute>),
+      },
       {
         path: '/admin/users',
         element: wrap(<ProtectedRoute role="Admin"><AdminUsers /></ProtectedRoute>),

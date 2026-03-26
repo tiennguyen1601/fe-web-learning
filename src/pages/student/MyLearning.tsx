@@ -12,11 +12,16 @@ import Alert from '@mui/material/Alert'
 import Container from '@mui/material/Container'
 import { PageLoader, GradientButton } from '@/components'
 import enrollmentsApi from '@/apis/enrollments.api'
+import { useAuthStore } from '@/hooks'
 
 const MyLearning = () => {
+  const { user } = useAuthStore()
+  const isStudent = user?.role === 'Student'
+
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['enrollments', 'my'],
     queryFn: () => enrollmentsApi.getMyEnrollments({ pageSize: 50 }),
+    enabled: isStudent,
   })
 
   if (isLoading) return <PageLoader />

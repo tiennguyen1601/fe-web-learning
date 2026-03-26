@@ -27,7 +27,7 @@ const AuthLayout = () => (
           LearnHub
         </Typography>
         <Typography sx={{ color: 'rgba(255,255,255,.85)', fontSize: 16, mb: 4 }}>
-          Học code. Thay đổi tương lai.
+          Học tiếng Anh. Thay đổi tương lai.
         </Typography>
         {['500+ khóa học chất lượng', 'Học theo lộ trình rõ ràng', 'Cộng đồng 50k+ học viên'].map((item) => (
           <Box key={item} display="flex" alignItems="center" gap={1.5} mb={1.5} justifyContent="center">

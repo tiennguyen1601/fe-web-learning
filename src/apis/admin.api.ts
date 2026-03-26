@@ -3,16 +3,30 @@ import type { AdminUserDto, PagedResult, PendingCourseDto, UserRole } from '@/ts
 
 const numToLevel: Record<number, string> = { 0: 'Beginner', 1: 'Intermediate', 2: 'Advanced' }
 const numToRole: Record<number, string> = { 0: 'Student', 1: 'Teacher', 2: 'Admin' }
-const normalizePendingCourse = (item: any) => !item ? item : {
+const normalizePendingCourse = (item: any) => !item ? item : ({
   ...item,
   level: typeof item.level === 'number' ? (numToLevel[item.level] ?? item.level) : item.level,
-}
+} as import('@/ts/types/api').PendingCourseDto)
 const normalizeUser = (item: any) => !item ? item : {
   ...item,
   role: typeof item.role === 'number' ? (numToRole[item.role] ?? item.role) : item.role,
 }
 
+export interface AdminStatsDto {
+  totalUsers: number
+  totalStudents: number
+  totalTeachers: number
+  totalCourses: number
+  publishedCourses: number
+  pendingCourses: number
+  totalEnrollments: number
+  totalCategories: number
+}
+
 const adminApi = {
+  getStats: (): Promise<AdminStatsDto> =>
+    axiosClient.get('/admin/stats'),
+
   getUsers: (params?: { role?: UserRole; page?: number; pageSize?: number }): Promise<PagedResult<AdminUserDto>> =>
     axiosClient.get('/admin/users', { params }).then((res: any) => ({ ...res, items: res.items?.map(normalizeUser) })),
 

@@ -16,6 +16,45 @@ const normalizeCourse = (item: any) => {
   }
 }
 
+export interface ScoreQuizAnswerDto {
+  questionId: string
+  questionText: string
+  selectedOption: string
+  correctOption: string
+  isCorrect: boolean
+}
+
+export interface StudentScoreDto {
+  assignmentId: string
+  assignmentTitle: string
+  assignmentType: string
+  maxScore: number
+  submissionId?: string
+  score?: number
+  status?: string
+  submittedAt?: string
+  quizAnswers: ScoreQuizAnswerDto[]
+}
+
+export interface TeacherStatsDto {
+  totalCourses: number
+  publishedCourses: number
+  totalStudents: number
+  totalAssignments: number
+  pendingGrading: number
+}
+
+export interface CourseStudentDto {
+  studentId: string
+  fullName: string
+  email: string
+  enrolledAt: string
+  completedAt?: string
+  totalLessons: number
+  completedLessons: number
+  progressPercent: number
+}
+
 export interface GetCoursesParams {
   search?: string
   categoryId?: string
@@ -42,11 +81,38 @@ const coursesApi = {
   delete: (id: string): Promise<void> =>
     axiosClient.delete(`/courses/${id}`),
 
+  getMyStats: (): Promise<TeacherStatsDto> =>
+    axiosClient.get('/courses/my/stats'),
+
   getMyCourses: (params?: { page?: number; pageSize?: number }): Promise<PagedResult<CourseListDto>> =>
     axiosClient.get('/courses/my', { params }).then((res: any) => ({ ...res, items: res.items?.map(normalizeCourse) })),
 
   publish: (id: string): Promise<{ message: string }> =>
     axiosClient.patch(`/courses/${id}/publish`),
+
+  getStudents: (courseId: string): Promise<CourseStudentDto[]> =>
+    axiosClient.get(`/courses/${courseId}/students`),
+
+  getStudentScores: (courseId: string, studentId: string): Promise<StudentScoreDto[]> =>
+    axiosClient.get(`/courses/${courseId}/assignments/students/${studentId}/scores`)
+      .then((res: any) => Array.isArray(res) ? res.map((s: any) => ({
+        ...s,
+        assignmentType: typeof s.assignmentType === 'number'
+          ? ({ 0: 'Quiz', 1: 'Essay', 2: 'ImageDescription' }[s.assignmentType as number] ?? s.assignmentType)
+          : s.assignmentType,
+        status: typeof s.status === 'number'
+          ? ({ 0: 'Submitted', 1: 'Graded' }[s.status as number] ?? s.status)
+          : s.status,
+        quizAnswers: (s.quizAnswers ?? []).map((a: any) => ({
+          ...a,
+          selectedOption: typeof a.selectedOption === 'number'
+            ? ({ 0: 'A', 1: 'B', 2: 'C', 3: 'D' }[a.selectedOption as number] ?? a.selectedOption)
+            : a.selectedOption,
+          correctOption: typeof a.correctOption === 'number'
+            ? ({ 0: 'A', 1: 'B', 2: 'C', 3: 'D' }[a.correctOption as number] ?? a.correctOption)
+            : a.correctOption,
+        })),
+      })) : res),
 }
 
 export default coursesApi

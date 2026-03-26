@@ -1,25 +1,24 @@
 import { useState, useCallback } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import Grid from '@mui/material/Grid'
-import Box from '@mui/material/Box'
-import Typography from '@mui/material/Typography'
-import TextField from '@mui/material/TextField'
-import FormGroup from '@mui/material/FormGroup'
-import FormControlLabel from '@mui/material/FormControlLabel'
-import Checkbox from '@mui/material/Checkbox'
-import RadioGroup from '@mui/material/RadioGroup'
-import Radio from '@mui/material/Radio'
-import FormLabel from '@mui/material/FormLabel'
+import { motion, AnimatePresence } from 'framer-motion'
 import Pagination from '@mui/material/Pagination'
-import Paper from '@mui/material/Paper'
-import Alert from '@mui/material/Alert'
-import Button from '@mui/material/Button'
-import { CourseCard, PageLoader } from '@/components'
+import { CourseCard } from '@/components'
 import coursesApi from '@/apis/courses.api'
 import categoriesApi from '@/apis/categories.api'
 import { useDebounce } from 'use-debounce'
 
-const LEVELS = ['Beginner', 'Intermediate', 'Advanced'] as const
+const LEVELS = [
+  { value: 'Beginner',     label: 'Cơ bản',    emoji: '🌱' },
+  { value: 'Intermediate', label: 'Trung cấp', emoji: '🚀' },
+  { value: 'Advanced',     label: 'Nâng cao',  emoji: '🏆' },
+]
+
+const STATS = [
+  { value: '500+', label: 'Khóa học', icon: '📚' },
+  { value: '50k+', label: 'Học viên', icon: '👨‍🎓' },
+  { value: '4.9★', label: 'Đánh giá', icon: '⭐' },
+  { value: '100%', label: 'Thực chiến', icon: '💡' },
+]
 
 const CourseList = () => {
   const [search, setSearch] = useState('')
@@ -28,6 +27,7 @@ const CourseList = () => {
   const [level, setLevel] = useState<string | undefined>()
   const [onlyFree, setOnlyFree] = useState(false)
   const [page, setPage] = useState(1)
+  const [filtersOpen, setFiltersOpen] = useState(false)
 
   const { data: categories } = useQuery({
     queryKey: ['categories'],
@@ -46,129 +46,314 @@ const CourseList = () => {
     }),
   })
 
-  const handleCategoryChange = useCallback((id: string, checked: boolean) => {
-    setCategoryId(checked ? id : undefined)
+  const handleCategoryChange = useCallback((id: string) => {
+    setCategoryId((prev) => (prev === id ? undefined : id))
     setPage(1)
   }, [])
 
-  if (isLoading) return <PageLoader />
-  if (isError) return (
-    <Box p={4}>
-      <Alert severity="error" action={<Button onClick={() => refetch()}>Thử lại</Button>}>
-        Không thể tải danh sách khóa học.
-      </Alert>
-    </Box>
-  )
+  const handleLevelChange = useCallback((val: string) => {
+    setLevel((prev) => (prev === val ? undefined : val))
+    setPage(1)
+  }, [])
+
+  const clearFilters = () => {
+    setCategoryId(undefined)
+    setLevel(undefined)
+    setOnlyFree(false)
+    setSearch('')
+    setPage(1)
+  }
+
+  const hasFilters = !!(categoryId || level || onlyFree || debouncedSearch)
 
   return (
-    <Box sx={{ minHeight: '100vh', background: '#f8fafc' }}>
-      {/* Hero */}
-      <Box
-        sx={{
-          background: 'linear-gradient(135deg, #4f46e5, #7c3aed, #db2777)',
-          py: { xs: 6, md: 8 },
-          px: 3,
-          textAlign: 'center',
-          position: 'relative',
-          overflow: 'hidden',
-        }}
-      >
-        <Box sx={{ position: 'absolute', width: 180, height: 180, borderRadius: '50%', background: 'rgba(255,255,255,.06)', top: -40, left: -40 }} />
-        <Box sx={{ position: 'absolute', width: 220, height: 220, borderRadius: '50%', background: 'rgba(255,255,255,.04)', bottom: -50, right: -30 }} />
-        <Box sx={{ position: 'relative', zIndex: 1 }}>
-          <Box sx={{ display: 'inline-block', background: 'rgba(255,255,255,.15)', border: '1px solid rgba(255,255,255,.25)', color: '#fff', fontSize: 12, fontWeight: 700, px: 2, py: 0.5, borderRadius: '20px', mb: 2 }}>
-            500+ khóa học đang chờ bạn
-          </Box>
-          <Typography variant="h3" sx={{ color: '#fff', fontWeight: 900, mb: 1, textShadow: '0 2px 10px rgba(0,0,0,.15)' }}>
-            Học code.<br />Thay đổi tương lai.
-          </Typography>
-          <Typography sx={{ color: 'rgba(255,255,255,.85)', mb: 3, fontSize: 16 }}>
-            Nền tảng học lập trình thực chiến hàng đầu Việt Nam
-          </Typography>
-        </Box>
-      </Box>
+    <div className="min-h-screen bg-gray-50">
 
-      {/* Stats bar */}
-      <Box sx={{ background: '#fff', borderBottom: '1px solid #e2e8f0', py: 2, px: 3, display: 'flex', justifyContent: 'center', gap: { xs: 4, md: 8 }, flexWrap: 'wrap' }}>
-        {[
-          { value: '500+', label: 'Khóa học' },
-          { value: '50k+', label: 'Học viên' },
-          { value: '4.9', label: 'Đánh giá' },
-          { value: '100%', label: 'Thực chiến' },
-        ].map((s) => (
-          <Box key={s.label} textAlign="center">
-            <Typography sx={{ fontWeight: 800, fontSize: 20, background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-              {s.value}
-            </Typography>
-            <Typography variant="caption" color="text.secondary">{s.label}</Typography>
-          </Box>
-        ))}
-      </Box>
+      {/* ── Hero ─────────────────────────────────────────────────────── */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500">
+        {/* decorative blobs */}
+        <div className="absolute -top-20 -left-20 w-72 h-72 rounded-full bg-white/5 blur-3xl" />
+        <div className="absolute -bottom-16 -right-16 w-96 h-96 rounded-full bg-white/5 blur-3xl" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full bg-purple-400/10 blur-2xl" />
 
-      <Box display="flex" gap={3} p={3} maxWidth="1400px" mx="auto">
-      {/* Sidebar filter */}
-      <Paper sx={{ width: 240, flexShrink: 0, p: 2, height: 'fit-content', position: 'sticky', top: 80 }}>
-        <Typography variant="subtitle1" fontWeight={700} mb={2}>Bộ lọc</Typography>
+        <div className="relative max-w-5xl mx-auto px-4 py-16 text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <span className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-sm border border-white/20 text-white text-xs font-bold px-4 py-1.5 rounded-full mb-5">
+              ✨ 500+ khóa học đang chờ bạn
+            </span>
+            <h1 className="text-4xl md:text-5xl font-black text-white mb-4 leading-tight" style={{ fontFamily: 'Poppins, sans-serif', textShadow: '0 2px 20px rgba(0,0,0,0.15)' }}>
+              Học tiếng Anh.<br />
+              <span className="text-yellow-300">Thay đổi tương lai.</span>
+            </h1>
+            <p className="text-white/80 text-lg mb-8 max-w-xl mx-auto">
+              Nền tảng học tập trực tuyến hàng đầu với hàng trăm khóa học được thiết kế bởi các chuyên gia
+            </p>
 
-        <FormLabel component="legend" sx={{ fontSize: 13, mb: 1 }}>Danh mục</FormLabel>
-        <FormGroup sx={{ mb: 2 }}>
-          {categories?.map((cat) => (
-            <FormControlLabel
-              key={cat.id}
-              control={<Checkbox size="small" checked={categoryId === cat.id} onChange={(e) => handleCategoryChange(cat.id, e.target.checked)} />}
-              label={<Typography variant="body2">{cat.name}</Typography>}
-            />
-          ))}
-        </FormGroup>
+            {/* Search bar */}
+            <div className="relative max-w-xl mx-auto">
+              <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+              <input
+                type="text"
+                placeholder="Tìm kiếm khóa học, chủ đề..."
+                value={search}
+                onChange={(e) => { setSearch(e.target.value); setPage(1) }}
+                className="w-full pl-12 pr-4 py-4 rounded-2xl text-gray-900 bg-white shadow-lg text-sm font-medium outline-none focus:ring-2 focus:ring-white/50 border-0"
+              />
+            </div>
+          </motion.div>
+        </div>
+      </div>
 
-        <FormLabel component="legend" sx={{ fontSize: 13, mb: 1 }}>Cấp độ</FormLabel>
-        <RadioGroup value={level ?? ''} onChange={(e) => { setLevel(e.target.value || undefined); setPage(1) }} sx={{ mb: 2 }}>
-          <FormControlLabel value="" control={<Radio size="small" />} label={<Typography variant="body2">Tất cả</Typography>} />
-          {LEVELS.map((l) => (
-            <FormControlLabel key={l} value={l} control={<Radio size="small" />} label={<Typography variant="body2">{l}</Typography>} />
-          ))}
-        </RadioGroup>
+      {/* ── Stats bar ─────────────────────────────────────────────────── */}
+      <div className="bg-white border-b border-gray-100 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex justify-center gap-8 md:gap-16 py-4 overflow-x-auto">
+            {STATS.map((s) => (
+              <div key={s.label} className="flex items-center gap-2.5 flex-shrink-0">
+                <span className="text-xl">{s.icon}</span>
+                <div>
+                  <div className="font-extrabold text-indigo-600 text-base leading-tight">{s.value}</div>
+                  <div className="text-xs text-gray-500">{s.label}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
 
-        <FormControlLabel
-          control={<Checkbox size="small" checked={onlyFree} onChange={(e) => { setOnlyFree(e.target.checked); setPage(1) }} />}
-          label={<Typography variant="body2">Miễn phí</Typography>}
-        />
-      </Paper>
+      {/* ── Main content ──────────────────────────────────────────────── */}
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="flex gap-8">
 
-      {/* Main content */}
-      <Box flexGrow={1}>
-        <TextField
-          fullWidth
-          placeholder="Tìm kiếm khóa học..."
-          value={search}
-          onChange={(e) => { setSearch(e.target.value); setPage(1) }}
-          size="small"
-          sx={{ mb: 3 }}
-        />
+          {/* Sidebar filter — desktop */}
+          <aside className="hidden lg:block w-56 flex-shrink-0">
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 sticky top-20">
+              <div className="flex items-center justify-between mb-5">
+                <h3 className="font-bold text-gray-900 text-sm">Bộ lọc</h3>
+                {hasFilters && (
+                  <button onClick={clearFilters} className="text-xs text-indigo-600 hover:underline font-medium">
+                    Xóa tất cả
+                  </button>
+                )}
+              </div>
 
-        {data?.items.length === 0 ? (
-          <Box textAlign="center" py={8}>
-            <Typography color="text.secondary">Không tìm thấy khóa học phù hợp.</Typography>
-          </Box>
-        ) : (
-          <>
-            <Grid container spacing={2}>
-              {data?.items.map((course) => (
-                <Grid item xs={12} sm={6} md={4} key={course.id}>
-                  <CourseCard course={course} />
-                </Grid>
-              ))}
-            </Grid>
-            {(data?.totalPages ?? 1) > 1 && (
-              <Box display="flex" justifyContent="center" mt={4}>
-                <Pagination count={data?.totalPages} page={page} onChange={(_, p) => setPage(p)} color="primary" />
-              </Box>
+              {/* Category */}
+              <div className="mb-5">
+                <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3">Danh mục</p>
+                <div className="flex flex-col gap-1">
+                  {categories?.map((cat) => (
+                    <button
+                      key={cat.id}
+                      onClick={() => handleCategoryChange(cat.id)}
+                      className={`text-left text-sm px-3 py-2 rounded-lg transition-colors font-medium ${
+                        categoryId === cat.id
+                          ? 'bg-indigo-50 text-indigo-700'
+                          : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                      }`}
+                    >
+                      {categoryId === cat.id && '✓ '}{cat.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Level */}
+              <div className="mb-5">
+                <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3">Cấp độ</p>
+                <div className="flex flex-col gap-1">
+                  {LEVELS.map((l) => (
+                    <button
+                      key={l.value}
+                      onClick={() => handleLevelChange(l.value)}
+                      className={`text-left text-sm px-3 py-2 rounded-lg transition-colors font-medium flex items-center gap-2 ${
+                        level === l.value
+                          ? 'bg-indigo-50 text-indigo-700'
+                          : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                      }`}
+                    >
+                      <span>{l.emoji}</span>{l.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Free only */}
+              <label className="flex items-center gap-2.5 cursor-pointer group">
+                <div
+                  onClick={() => { setOnlyFree((v) => !v); setPage(1) }}
+                  className={`w-10 h-6 rounded-full transition-colors flex-shrink-0 relative cursor-pointer ${onlyFree ? 'bg-indigo-600' : 'bg-gray-200'}`}
+                >
+                  <div className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow transition-transform ${onlyFree ? 'translate-x-5' : 'translate-x-1'}`} />
+                </div>
+                <span className="text-sm font-medium text-gray-700">Chỉ miễn phí</span>
+              </label>
+            </div>
+          </aside>
+
+          {/* Main */}
+          <div className="flex-1 min-w-0">
+            {/* Toolbar */}
+            <div className="flex items-center justify-between mb-5 gap-3">
+              <div className="flex items-center gap-2 flex-wrap">
+                {hasFilters && (
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {categoryId && categories?.find(c => c.id === categoryId) && (
+                      <span className="inline-flex items-center gap-1.5 bg-indigo-100 text-indigo-700 text-xs font-semibold px-3 py-1.5 rounded-full">
+                        {categories?.find(c => c.id === categoryId)?.name}
+                        <button onClick={() => setCategoryId(undefined)} className="hover:text-indigo-900 ml-0.5">×</button>
+                      </span>
+                    )}
+                    {level && (
+                      <span className="inline-flex items-center gap-1.5 bg-purple-100 text-purple-700 text-xs font-semibold px-3 py-1.5 rounded-full">
+                        {LEVELS.find(l => l.value === level)?.label}
+                        <button onClick={() => setLevel(undefined)} className="hover:text-purple-900 ml-0.5">×</button>
+                      </span>
+                    )}
+                    {onlyFree && (
+                      <span className="inline-flex items-center gap-1.5 bg-green-100 text-green-700 text-xs font-semibold px-3 py-1.5 rounded-full">
+                        Miễn phí
+                        <button onClick={() => setOnlyFree(false)} className="hover:text-green-900 ml-0.5">×</button>
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
+              {data && (
+                <span className="text-sm text-gray-500 flex-shrink-0">
+                  <strong className="text-gray-900">{data.totalCount ?? data.items.length}</strong> kết quả
+                </span>
+              )}
+
+              {/* Mobile filter toggle */}
+              <button
+                className="lg:hidden flex items-center gap-2 text-sm font-semibold text-gray-700 border border-gray-200 px-3 py-2 rounded-xl hover:bg-gray-50"
+                onClick={() => setFiltersOpen(!filtersOpen)}
+              >
+                ⚙️ Bộ lọc
+              </button>
+            </div>
+
+            {/* Mobile filters */}
+            <AnimatePresence>
+              {filtersOpen && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="lg:hidden overflow-hidden mb-5"
+                >
+                  <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 flex flex-wrap gap-3">
+                    <div className="w-full">
+                      <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Danh mục</p>
+                      <div className="flex flex-wrap gap-2">
+                        {categories?.map((cat) => (
+                          <button
+                            key={cat.id}
+                            onClick={() => handleCategoryChange(cat.id)}
+                            className={`text-xs px-3 py-1.5 rounded-full font-semibold border transition-colors ${
+                              categoryId === cat.id ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-200 text-gray-600 hover:border-indigo-300'
+                            }`}
+                          >{cat.name}</button>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Cấp độ</p>
+                      <div className="flex gap-2">
+                        {LEVELS.map((l) => (
+                          <button
+                            key={l.value}
+                            onClick={() => handleLevelChange(l.value)}
+                            className={`text-xs px-3 py-1.5 rounded-full font-semibold border transition-colors ${
+                              level === l.value ? 'bg-purple-600 text-white border-purple-600' : 'border-gray-200 text-gray-600 hover:border-purple-300'
+                            }`}
+                          >{l.emoji} {l.label}</button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {isLoading ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="rounded-2xl bg-white border border-gray-100 overflow-hidden animate-pulse">
+                    <div className="h-44 bg-gray-200" />
+                    <div className="p-4 space-y-3">
+                      <div className="h-4 bg-gray-200 rounded w-3/4" />
+                      <div className="h-3 bg-gray-200 rounded w-1/2" />
+                      <div className="h-3 bg-gray-200 rounded w-2/3" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : isError ? (
+              <div className="text-center py-16">
+                <p className="text-gray-500 mb-4">Không thể tải danh sách khóa học.</p>
+                <button onClick={() => refetch()} className="px-5 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-semibold hover:bg-indigo-700 transition-colors">
+                  Thử lại
+                </button>
+              </div>
+            ) : data?.items.length === 0 ? (
+              <div className="text-center py-16">
+                <span className="text-5xl mb-4 block">🔍</span>
+                <p className="text-gray-600 font-semibold mb-2">Không tìm thấy kết quả</p>
+                <p className="text-gray-400 text-sm mb-5">Thử tìm kiếm với từ khóa khác hoặc xóa bộ lọc</p>
+                <button onClick={clearFilters} className="px-5 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-semibold hover:bg-indigo-700 transition-colors">
+                  Xóa bộ lọc
+                </button>
+              </div>
+            ) : (
+              <>
+                <motion.div
+                  className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5"
+                  initial="hidden"
+                  animate="visible"
+                  variants={{
+                    hidden: {},
+                    visible: { transition: { staggerChildren: 0.05 } },
+                  }}
+                >
+                  {data?.items.map((course) => (
+                    <motion.div
+                      key={course.id}
+                      variants={{
+                        hidden: { opacity: 0, y: 16 },
+                        visible: { opacity: 1, y: 0, transition: { duration: 0.3 } },
+                      }}
+                    >
+                      <CourseCard course={course} />
+                    </motion.div>
+                  ))}
+                </motion.div>
+
+                {(data?.totalPages ?? 1) > 1 && (
+                  <div className="flex justify-center mt-10">
+                    <Pagination
+                      count={data?.totalPages}
+                      page={page}
+                      onChange={(_, p) => { setPage(p); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
+                      color="primary"
+                      size="large"
+                    />
+                  </div>
+                )}
+              </>
             )}
-          </>
-        )}
-      </Box>
-    </Box>
-    </Box>
+          </div>
+        </div>
+      </div>
+    </div>
   )
 }
 

@@ -115,7 +115,14 @@ export interface AdminUserDto {
 export interface PendingCourseDto {
   id: string
   title: string
+  description: string
+  thumbnailUrl?: string
   teacherName: string
+  categoryName: string
+  level: CourseLevel
+  price: number
+  isFree: boolean
+  lessonCount: number
   createdAt: string
 }
 

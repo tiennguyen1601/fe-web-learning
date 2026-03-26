@@ -5,9 +5,16 @@ import Typography from '@mui/material/Typography'
 import Button from '@mui/material/Button'
 import Alert from '@mui/material/Alert'
 import Divider from '@mui/material/Divider'
+import Chip from '@mui/material/Chip'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
+import AssignmentIcon from '@mui/icons-material/Assignment'
+import QuizIcon from '@mui/icons-material/Quiz'
+import TextSnippetIcon from '@mui/icons-material/TextSnippet'
+import ImageIcon from '@mui/icons-material/Image'
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
 import lessonsApi from '@/apis/lessons.api'
 import enrollmentsApi from '@/apis/enrollments.api'
+import assignmentsApi from '@/apis/assignments.api'
 import { useAuthStore } from '@/hooks'
 import { PageLoader, GradientButton } from '@/components'
 
@@ -28,7 +35,7 @@ const LessonView = () => {
   const { data: enrollments } = useQuery({
     queryKey: ['enrollments', 'my'],
     queryFn: () => enrollmentsApi.getMyEnrollments({ pageSize: 100 }),
-    enabled: !!user,
+    enabled: !!user && user.role === 'Student',
   })
 
   const enrollment = enrollments?.items.find((e) => e.courseId === courseId)
@@ -36,6 +43,12 @@ const LessonView = () => {
   const { data: lessons, isLoading } = useQuery({
     queryKey: ['lessons', courseId],
     queryFn: () => lessonsApi.getByCourse(courseId!),
+    enabled: !!courseId,
+  })
+
+  const { data: allAssignments } = useQuery({
+    queryKey: ['assignments', courseId],
+    queryFn: () => assignmentsApi.getAll(courseId!),
     enabled: !!courseId,
   })
 
@@ -66,6 +79,18 @@ const LessonView = () => {
   )
 
   const courseTitle = enrollment?.courseTitle
+  const lessonAssignments = (allAssignments ?? []).filter((a) => a.lessonId === lesson.id)
+
+  const typeIcon: Record<string, React.ReactNode> = {
+    Quiz: <QuizIcon fontSize="small" />,
+    Essay: <TextSnippetIcon fontSize="small" />,
+    ImageDescription: <ImageIcon fontSize="small" />,
+  }
+  const typeLabel: Record<string, string> = {
+    Quiz: 'Trắc nghiệm',
+    Essay: 'Tự luận',
+    ImageDescription: 'Tả ảnh',
+  }
 
   return (
     <Box>
@@ -100,6 +125,60 @@ const LessonView = () => {
         />
       ) : (
         <Typography color="text.secondary" mb={3}>Bài học này chưa có nội dung.</Typography>
+      )}
+
+      {/* Assignments for this lesson */}
+      {lessonAssignments.length > 0 && (
+        <Box mb={3}>
+          <Divider sx={{ mb: 2 }} />
+          <Box display="flex" alignItems="center" gap={1} mb={1.5}>
+            <AssignmentIcon sx={{ color: '#7c3aed', fontSize: 20 }} />
+            <Typography variant="subtitle1" fontWeight={700} color="#7c3aed">
+              Bài tập của bài học này
+            </Typography>
+            <Chip label={lessonAssignments.length} size="small" sx={{ bgcolor: '#ede9fe', color: '#7c3aed', fontWeight: 700 }} />
+          </Box>
+          <Box display="flex" flexDirection="column" gap={1.5}>
+            {lessonAssignments.map((a) => (
+              <Box
+                key={a.id}
+                display="flex" alignItems="center" gap={2} px={2.5} py={1.5}
+                sx={{
+                  border: '1.5px solid #e9d5ff',
+                  borderRadius: 2,
+                  bgcolor: '#faf5ff',
+                  '&:hover': { bgcolor: '#f3e8ff', borderColor: '#c4b5fd' },
+                  transition: 'background .15s',
+                }}
+              >
+                <Box sx={{ color: '#7c3aed' }}>{typeIcon[a.type]}</Box>
+                <Box flex={1} minWidth={0}>
+                  <Typography variant="body2" fontWeight={700}>{a.title}</Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    {typeLabel[a.type] ?? a.type}
+                    {a.type === 'Quiz' && ` · ${a.totalQuestions} câu`}
+                    {` · ${a.maxScore} điểm`}
+                    {a.deadline && ` · Hạn: ${new Date(a.deadline).toLocaleDateString('vi-VN')}`}
+                  </Typography>
+                </Box>
+                <Button
+                  variant="contained"
+                  size="small"
+                  endIcon={<ArrowForwardIcon />}
+                  component={Link as any}
+                  to={`/learn/${courseId}/assignment/${a.id}`}
+                  sx={{
+                    background: 'linear-gradient(135deg,#7c3aed,#4f46e5)',
+                    fontSize: 12, px: 2, flexShrink: 0,
+                    '&:hover': { background: 'linear-gradient(135deg,#6d28d9,#4338ca)' },
+                  }}
+                >
+                  Làm bài
+                </Button>
+              </Box>
+            ))}
+          </Box>
+        </Box>
       )}
 
       <Divider sx={{ mb: 2 }} />

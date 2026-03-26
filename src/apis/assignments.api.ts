@@ -12,6 +12,7 @@ export interface QuizQuestionDto {
   optionC: string;
   optionD: string;
   order: number;
+  correctOption?: QuizOption; // only populated for teachers
 }
 
 export interface AssignmentSummary {
@@ -24,6 +25,7 @@ export interface AssignmentSummary {
   maxScore: number;
   totalQuestions: number;
   createdAt: string;
+  lessonId?: string;
 }
 
 export interface AssignmentDetail extends AssignmentSummary {
@@ -69,6 +71,30 @@ export interface CreateAssignmentRequest {
   deadline?: string;
   maxScore: number;
   questions?: CreateQuizQuestionRequest[];
+  lessonId?: string;
+}
+
+export interface UpdateAssignmentRequest {
+  title: string;
+  description?: string;
+  imageUrl?: string;
+  deadline?: string;
+  maxScore: number;
+  questions?: CreateQuizQuestionRequest[];
+}
+
+export interface MyAssignmentDto {
+  assignmentId: string
+  assignmentTitle: string
+  assignmentType: string
+  maxScore: number
+  deadline?: string
+  courseId: string
+  courseTitle: string
+  submissionId?: string
+  score?: number
+  submissionStatus?: string
+  submittedAt?: string
 }
 
 export interface SubmitAssignmentRequest {
@@ -95,21 +121,52 @@ const normalizeAssignment = (item: any) => {
   return result
 }
 
+const numToStatus: Record<number, string> = { 0: 'Submitted', 1: 'Graded' }
+const normalizeSubmission = (s: any): SubmissionDto => ({
+  ...s,
+  status: typeof s.status === 'number' ? (numToStatus[s.status] ?? s.status) : s.status,
+  quizAnswers: (s.quizAnswers ?? []).map((a: any) => ({
+    ...a,
+    selectedOption: typeof a.selectedOption === 'number' ? (numToOption[a.selectedOption] ?? a.selectedOption) : a.selectedOption,
+    correctOption: typeof a.correctOption === 'number' ? (numToOption[a.correctOption] ?? a.correctOption) : a.correctOption,
+  })),
+})
+
 const assignmentsApi = {
   // Danh sách bài tập của course
   getAll: (courseId: string): Promise<AssignmentSummary[]> =>
     axiosClient.get(`/courses/${courseId}/assignments`).then((res: any) =>
       Array.isArray(res) ? res.map(normalizeAssignment) : res),
 
-  // Chi tiết bài tập (câu hỏi nhưng không có đáp án)
+  // Chi tiết bài tập (teacher nhận được correctOption)
   getById: (courseId: string, assignmentId: string): Promise<AssignmentDetail> =>
-    axiosClient.get(`/courses/${courseId}/assignments/${assignmentId}`).then(normalizeAssignment),
+    axiosClient.get(`/courses/${courseId}/assignments/${assignmentId}`).then((res: any) => {
+      const a = normalizeAssignment(res)
+      if (a.questions) {
+        a.questions = a.questions.map((q: any) =>
+          q.correctOption != null && typeof q.correctOption === 'number'
+            ? { ...q, correctOption: numToOption[q.correctOption] ?? q.correctOption }
+            : q
+        )
+      }
+      return a
+    }),
 
   // Teacher tạo bài tập
   create: (courseId: string, data: CreateAssignmentRequest): Promise<{ id: string }> =>
     axiosClient.post(`/courses/${courseId}/assignments`, {
       ...data,
       type: typeToNum[data.type] ?? data.type,
+      questions: data.questions?.map((q) => ({
+        ...q,
+        correctOption: optionToNum[q.correctOption] ?? q.correctOption,
+      })),
+    }),
+
+  // Teacher sửa bài tập
+  update: (courseId: string, assignmentId: string, data: UpdateAssignmentRequest): Promise<void> =>
+    axiosClient.put(`/courses/${courseId}/assignments/${assignmentId}`, {
+      ...data,
       questions: data.questions?.map((q) => ({
         ...q,
         correctOption: optionToNum[q.correctOption] ?? q.correctOption,
@@ -132,11 +189,24 @@ const assignmentsApi = {
 
   // Teacher xem tất cả bài nộp
   getSubmissions: (courseId: string, assignmentId: string): Promise<SubmissionDto[]> =>
-    axiosClient.get(`/courses/${courseId}/assignments/${assignmentId}/submissions`),
+    axiosClient.get(`/courses/${courseId}/assignments/${assignmentId}/submissions`)
+      .then((res: any) => Array.isArray(res) ? res.map(normalizeSubmission) : res),
 
   // Student xem bài nộp của mình
   getMySubmission: (courseId: string, assignmentId: string): Promise<SubmissionDto | null> =>
-    axiosClient.get(`/courses/${courseId}/assignments/${assignmentId}/submissions/my`),
+    axiosClient.get(`/courses/${courseId}/assignments/${assignmentId}/submissions/my`)
+      .then((res: any) => res ? normalizeSubmission(res) : null),
+
+  // Student xem tất cả assignments của mình (tất cả course đã enroll)
+  getMyAssignments: (): Promise<MyAssignmentDto[]> =>
+    axiosClient.get('/assignments/my').then((res: any) =>
+      Array.isArray(res) ? res.map((a: any) => ({
+        ...a,
+        assignmentType: typeof a.assignmentType === 'number' ? (numToType[a.assignmentType] ?? a.assignmentType) : a.assignmentType,
+        submissionStatus: typeof a.submissionStatus === 'number'
+          ? ({ 0: 'Submitted', 1: 'Graded' }[a.submissionStatus as number] ?? a.submissionStatus)
+          : a.submissionStatus,
+      })) : res),
 
   // Teacher chấm điểm (chỉ Essay / ImageDescription)
   grade: (courseId: string, assignmentId: string, submissionId: string, data: { score: number; feedback?: string }): Promise<void> =>

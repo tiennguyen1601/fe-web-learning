@@ -63,7 +63,7 @@ Replace the entire `<head>` section:
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>LearnHub — Học code. Thay đổi tương lai.</title>
+    <title>LearnHub — Học tiếng Anh. Thay đổi tương lai.</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
@@ -771,7 +771,7 @@ const FooterComponent = () => (
     }}
   >
     <Typography variant="body2" sx={{ color: 'rgba(255,255,255,.6)', textAlign: 'center' }}>
-      © 2026 <strong style={{ color: '#fff' }}>LearnHub</strong> — Học code. Thay đổi tương lai.
+      © 2026 <strong style={{ color: '#fff' }}>LearnHub</strong> — Học tiếng Anh. Thay đổi tương lai.
     </Typography>
   </Box>
 )
@@ -833,10 +833,10 @@ At the top of the returned JSX (before the filter+grid container), insert:
       🔥 500+ khóa học đang chờ bạn
     </Box>
     <Typography variant="h3" sx={{ color: '#fff', fontWeight: 900, mb: 1, textShadow: '0 2px 10px rgba(0,0,0,.15)' }}>
-      Học code.<br />Thay đổi tương lai.
+      Học tiếng Anh.<br />Thay đổi tương lai.
     </Typography>
     <Typography sx={{ color: 'rgba(255,255,255,.85)', mb: 3, fontSize: 16 }}>
-      Nền tảng học lập trình thực chiến hàng đầu Việt Nam
+      Nền tảng học tập hàng đầu Việt Nam
     </Typography>
   </Box>
 </Box>
@@ -964,7 +964,7 @@ const AuthLayout = () => (
           📚 LearnHub
         </Typography>
         <Typography sx={{ color: 'rgba(255,255,255,.85)', fontSize: 16, mb: 4 }}>
-          Học code. Thay đổi tương lai.
+          Học tiếng Anh. Thay đổi tương lai.
         </Typography>
         {['500+ khóa học chất lượng', 'Học theo lộ trình rõ ràng', 'Cộng đồng 50k+ học viên'].map((item) => (
           <Box key={item} display="flex" alignItems="center" gap={1.5} mb={1.5} justifyContent="center">

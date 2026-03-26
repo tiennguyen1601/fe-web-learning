@@ -31,7 +31,7 @@ const LearningLayout = () => {
   const { data: enrollments } = useQuery({
     queryKey: ['enrollments', 'my'],
     queryFn: () => enrollmentsApi.getMyEnrollments({ pageSize: 100 }),
-    enabled: !!user,
+    enabled: !!user && user.role === 'Student',
   })
 
   const enrollment = enrollments?.items.find((e) => e.courseId === courseId)
@@ -82,59 +82,88 @@ const LearningLayout = () => {
         </Box>
         <Divider />
         <Typography variant="caption" color="text.secondary" px={2} py={1} display="block">
-          Danh sách bài học
+          Nội dung khóa học
         </Typography>
-        <List dense>
+        <List dense disablePadding>
           {sorted.map((lesson, i) => {
             const isCompleted = progress ? i < progress.completedLessons : false
+            const lessonAssignments = (assignments ?? []).filter((a) => a.lessonId === lesson.id)
             return (
-            <ListItemButton
-              key={lesson.id}
-              selected={lesson.id === lessonId}
-              component={Link as any}
-              to={`/learn/${courseId}/lesson/${lesson.id}`}
-              sx={{
-                '&.Mui-selected': {
-                  background: '#eef2ff',
-                  borderLeft: '3px solid #4f46e5',
-                  '& .MuiListItemText-primary': { color: '#4f46e5', fontWeight: 700 },
-                },
-                '&.Mui-selected:hover': { background: '#e0e7ff' },
-              }}
-            >
-              <ListItemIcon sx={{ minWidth: 32 }}>
-                {isCompleted
-                  ? <CheckCircleIcon fontSize="small" sx={{ color: '#10b981' }} />
-                  : <RadioButtonUncheckedIcon fontSize="small" sx={{ color: lesson.id === lessonId ? '#4f46e5' : 'text.secondary' }} />
-                }
-              </ListItemIcon>
-              <ListItemText
-                primary={lesson.title}
-                secondary={lesson.duration ? `${lesson.duration} phút` : undefined}
-                primaryTypographyProps={{ variant: 'body2', noWrap: true }}
-              />
-            </ListItemButton>
-          )})}
-        </List>
+              <Box key={lesson.id}>
+                {/* Lesson row */}
+                <ListItemButton
+                  selected={lesson.id === lessonId}
+                  component={Link as any}
+                  to={`/learn/${courseId}/lesson/${lesson.id}`}
+                  sx={{
+                    '&.Mui-selected': {
+                      background: '#eef2ff',
+                      borderLeft: '3px solid #4f46e5',
+                      '& .MuiListItemText-primary': { color: '#4f46e5', fontWeight: 700 },
+                    },
+                    '&.Mui-selected:hover': { background: '#e0e7ff' },
+                  }}
+                >
+                  <ListItemIcon sx={{ minWidth: 32 }}>
+                    {isCompleted
+                      ? <CheckCircleIcon fontSize="small" sx={{ color: '#10b981' }} />
+                      : <RadioButtonUncheckedIcon fontSize="small" sx={{ color: lesson.id === lessonId ? '#4f46e5' : 'text.secondary' }} />
+                    }
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={lesson.title}
+                    secondary={lesson.duration ? `${lesson.duration} phút` : undefined}
+                    primaryTypographyProps={{ variant: 'body2', noWrap: true }}
+                  />
+                </ListItemButton>
 
-        {assignments && assignments.length > 0 && (
-          <>
-            <Divider />
-            <Typography variant="caption" color="text.secondary" px={2} py={1} display="block">
-              Bài tập
-            </Typography>
-            <List dense>
-              {assignments.map((a) => (
+                {/* Assignments for this lesson — shown indented right below */}
+                {lessonAssignments.map((a) => (
+                  <ListItemButton
+                    key={a.id}
+                    selected={a.id === assignmentId}
+                    component={Link as any}
+                    to={`/learn/${courseId}/assignment/${a.id}`}
+                    sx={{
+                      pl: 4,
+                      bgcolor: '#faf9ff',
+                      '&.Mui-selected': {
+                        background: '#f3e8ff',
+                        borderLeft: '3px solid #7c3aed',
+                      },
+                      '&.Mui-selected:hover': { background: '#ede9fe' },
+                    }}
+                  >
+                    <ListItemIcon sx={{ minWidth: 28 }}>
+                      <AssignmentIcon fontSize="small" sx={{ color: '#7c3aed', fontSize: 16 }} />
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={a.title}
+                      secondary={a.type === 'Quiz' ? `${a.totalQuestions} câu` : a.type === 'Essay' ? 'Tự luận' : 'Tả ảnh'}
+                      primaryTypographyProps={{ variant: 'caption', noWrap: true, fontWeight: 600 }}
+                      secondaryTypographyProps={{ variant: 'caption', fontSize: 10 }}
+                    />
+                  </ListItemButton>
+                ))}
+              </Box>
+            )
+          })}
+
+          {/* Course-level assignments (not linked to any lesson) */}
+          {(assignments ?? []).filter((a) => !a.lessonId).length > 0 && (
+            <>
+              <Divider sx={{ my: 0.5 }} />
+              <Typography variant="caption" color="text.secondary" px={2} pt={0.5} pb={0.5} display="block">
+                Bài tập chung
+              </Typography>
+              {(assignments ?? []).filter((a) => !a.lessonId).map((a) => (
                 <ListItemButton
                   key={a.id}
                   selected={a.id === assignmentId}
                   component={Link as any}
                   to={`/learn/${courseId}/assignment/${a.id}`}
                   sx={{
-                    '&.Mui-selected': {
-                      background: '#faf5ff',
-                      borderLeft: '3px solid #7c3aed',
-                    },
+                    '&.Mui-selected': { background: '#faf5ff', borderLeft: '3px solid #7c3aed' },
                     '&.Mui-selected:hover': { background: '#f3e8ff' },
                   }}
                 >
@@ -149,9 +178,9 @@ const LearningLayout = () => {
                   />
                 </ListItemButton>
               ))}
-            </List>
-          </>
-        )}
+            </>
+          )}
+        </List>
       </Box>
 
       {/* Main content */}
