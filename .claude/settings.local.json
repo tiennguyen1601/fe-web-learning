@@ -27,7 +27,19 @@
       "Bash(curl -s -o /dev/null -w \"%{http_code}\" 'https://jayden.io.vn/api/v1/auth/register' -H 'Content-Type: application/json' --data-raw '{\"\"fullName\"\":\"\"test\"\",\"\"email\"\":\"\"test999@test.com\"\",\"\"password\"\":\"\"Test@123456\"\",\"\"role\"\":1}')",
       "Bash(curl -sv 'https://jayden.io.vn/api/v1/auth/register' -H 'Content-Type: application/json' --data-raw '{\"\"\"\"fullName\"\"\"\":\"\"\"\"test\"\"\"\",\"\"\"\"email\"\"\"\":\"\"\"\"test999@test.com\"\"\"\",\"\"\"\"password\"\"\"\":\"\"\"\"Test@123456\"\"\"\",\"\"\"\"role\"\"\"\":1}')",
       "Bash(ping -n 2 jayden.io.vn)",
-      "Bash(nslookup jayden.io.vn)"
+      "Bash(nslookup jayden.io.vn)",
+      "Read(//c/Users/nguye/.claude/plugins/cache/claude-plugins-official/superpowers/5.0.6/skills/subagent-driven-development/**)",
+      "Bash(rm -rf src/*/obj src/*/bin)",
+      "Bash(dotnet clean:*)",
+      "Bash(powershell -Command \"Get-Process dotnet -ErrorAction SilentlyContinue | Stop-Process -Force; Start-Sleep -Seconds 3; Write-Host ''Done''\")",
+      "Bash(powershell -Command \"Get-Process dotnet -ErrorAction SilentlyContinue | Stop-Process -Force\")",
+      "Bash(mkdir -p \"d:/FPT/Project/LearningWeb/src/LearningWeb.Application/Notifications/Queries/GetNotifications\")",
+      "Bash(mkdir -p \"d:/FPT/Project/LearningWeb/src/LearningWeb.Application/Notifications/Commands/MarkAllRead\")",
+      "Bash(grep -r \"from ''''@tanstack/react-query''''\\\\|from ''''react-query''''\" src --include=\"*.tsx\" --include=\"*.ts\" -l)",
+      "Bash(grep \"from ''''@tanstack/react-query''''\" src/features/assignments/hooks/useAssignmentQueries.ts)",
+      "Bash(mkdir -p \"d:/FPT/Project/LearningWeb/src/LearningWeb.Application/Reviews/Commands/UpsertReview\")",
+      "Bash(mkdir -p \"d:/FPT/Project/LearningWeb/src/LearningWeb.Application/Reviews/Queries/GetReviews\")",
+      "Bash(mkdir -p \"d:/FPT/Project/LearningWeb/src/LearningWeb.Application/Reviews/Queries/GetMyReview\")"
     ],
     "additionalDirectories": [
       "d:\\FPT\\Project\\LearningWeb\\src\\LearningWeb.Application\\Assignments\\Queries\\GetMyAssignments",
@@ -36,7 +48,21 @@
       "D:\\FPT\\Project\\LearningWeb\\src\\LearningWeb.Application\\Assignments\\Commands\\CreateAssignment",
       "D:\\FPT\\Project\\LearningWeb\\src\\LearningWeb.Application\\Assignments\\Queries\\GetAssignments",
       "d:\\FPT\\Project\\LearningWeb\\src\\LearningWeb.Application\\Assignments\\Queries\\GetAssignmentById",
-      "d:\\FPT\\Project\\LearningWeb\\src\\LearningWeb.Application\\Assignments\\Commands"
+      "d:\\FPT\\Project\\LearningWeb\\src\\LearningWeb.Application\\Assignments\\Commands",
+      "d:\\FPT\\Project\\LearningWeb\\src\\LearningWeb.Domain\\Enums",
+      "d:\\FPT\\Project\\LearningWeb\\src\\LearningWeb.Application\\Enrollments\\Commands\\EnrollCourse",
+      "d:\\FPT\\Project\\LearningWeb\\src\\LearningWeb.Application\\Enrollments\\Commands\\ApproveEnrollment",
+      "d:\\FPT\\Project\\LearningWeb\\src\\LearningWeb.Application\\Enrollments\\Commands\\RejectEnrollment",
+      "d:\\FPT\\Project\\LearningWeb\\src\\LearningWeb.Application\\Enrollments\\Queries\\GetPendingEnrollments",
+      "d:\\FPT\\Project\\LearningWeb\\src\\LearningWeb.Application\\Enrollments\\Queries\\GetMyEnrollments",
+      "d:\\FPT\\Project\\LearningWeb\\src\\LearningWeb.Infrastructure\\Migrations",
+      "d:\\FPT\\Project\\LearningWeb\\src\\LearningWeb.Application\\Interfaces",
+      "d:\\FPT\\Project\\LearningWeb\\src\\LearningWeb.Infrastructure\\Persistence",
+      "d:\\FPT\\Project\\LearningWeb\\src\\LearningWeb.Domain\\obj\\Debug\\net8.0",
+      "d:\\FPT\\Project\\LearningWeb\\src\\LearningWeb.Application\\Notifications\\Queries\\GetNotifications",
+      "d:\\FPT\\Project\\LearningWeb\\src\\LearningWeb.Application\\Notifications\\Commands\\MarkAllRead",
+      "d:\\FPT\\Project\\LearningWeb\\src\\LearningWeb.Application\\Reviews\\Commands\\UpsertReview",
+      "d:\\FPT\\Project\\LearningWeb\\src\\LearningWeb.Application\\Reviews\\Queries\\GetReviews"
     ]
   }
 }
