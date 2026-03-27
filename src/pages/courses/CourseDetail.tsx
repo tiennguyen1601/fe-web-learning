@@ -48,9 +48,12 @@ const CourseDetail = () => {
     enabled: !!user && user.role === 'Student',
   })
 
-  const isEnrolled = enrollments?.items.some((e) => e.courseId === id)
+  const myEnrollment = enrollments?.items.find((e) => e.courseId === id)
+  const isEnrolled = myEnrollment?.status === 'Approved'
+  const isPending = myEnrollment?.status === 'Pending'
+  const isRejected = myEnrollment?.status === 'Rejected'
 
-  const { mutate: enroll, isPending } = useMutation({
+  const { mutate: enroll, isPending: isEnrolling } = useMutation({
     mutationFn: () => enrollmentsApi.enroll(id!),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['enrollments', 'my'] }) },
     onError: (err: any) => {
@@ -462,9 +465,32 @@ const CourseDetail = () => {
                         Chưa có bài học
                       </button>
                     )
+                  ) : isPending ? (
+                    <div className="w-full py-3 rounded-xl bg-amber-50 border border-amber-200 text-center">
+                      <span className="text-amber-700 font-semibold text-sm">⏳ Đang chờ giáo viên duyệt</span>
+                    </div>
+                  ) : isRejected ? (
+                    <div className="space-y-2">
+                      <div className="w-full py-2.5 rounded-xl bg-red-50 border border-red-200 text-center">
+                        <span className="text-red-600 font-semibold text-sm">✗ Yêu cầu bị từ chối</span>
+                      </div>
+                      {myEnrollment?.rejectionReason && (
+                        <p className="text-xs text-gray-500 text-center px-1">Lý do: {myEnrollment.rejectionReason}</p>
+                      )}
+                      <button
+                        onClick={() => {
+                          if (!user) navigate('/login', { state: { from: { pathname: `/courses/${id}` } } })
+                          else enroll()
+                        }}
+                        className="w-full py-3 rounded-xl font-bold text-sm text-white transition-all hover:opacity-90 active:scale-95"
+                        style={{ background: 'linear-gradient(135deg, #4f46e5, #7c3aed)' }}
+                      >
+                        Đăng ký lại
+                      </button>
+                    </div>
                   ) : (
                     <button
-                      disabled={isPending}
+                      disabled={isEnrolling}
                       onClick={() => {
                         if (!user) navigate('/login', { state: { from: { pathname: `/courses/${id}` } } })
                         else enroll()
@@ -472,7 +498,7 @@ const CourseDetail = () => {
                       className="w-full py-3 rounded-xl font-bold text-sm text-white transition-all hover:opacity-90 hover:shadow-lg active:scale-95 disabled:opacity-60"
                       style={{ background: 'linear-gradient(135deg, #4f46e5, #7c3aed)' }}
                     >
-                      {isPending ? 'Đang đăng ký...' : course.isFree ? 'Đăng ký miễn phí' : 'Đăng ký ngay'}
+                      {isEnrolling ? 'Đang đăng ký...' : course.isFree ? 'Đăng ký miễn phí' : 'Đăng ký ngay'}
                     </button>
                   )}
 
