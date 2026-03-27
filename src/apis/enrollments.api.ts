@@ -1,5 +1,5 @@
 import axiosClient from './axios-client'
-import type { MyEnrollmentDto, ProgressDto, PagedResult } from '@/ts/types/api'
+import type { MyEnrollmentDto, ProgressDto, PagedResult, PendingEnrollmentDto } from '@/ts/types/api'
 
 const enrollmentsApi = {
   enroll: (courseId: string): Promise<{ id: string }> =>
@@ -13,6 +13,15 @@ const enrollmentsApi = {
 
   markLessonComplete: (lessonId: string): Promise<{ message: string }> =>
     axiosClient.post(`/progress/lessons/${lessonId}/complete`),
+
+  approve: (enrollmentId: string): Promise<void> =>
+    axiosClient.patch(`/enrollments/${enrollmentId}/approve`),
+
+  reject: (enrollmentId: string, reason: string): Promise<void> =>
+    axiosClient.patch(`/enrollments/${enrollmentId}/reject`, { reason }),
+
+  getPending: (courseId: string): Promise<PendingEnrollmentDto[]> =>
+    axiosClient.get(`/courses/${courseId}/enrollments/pending`),
 }
 
 export default enrollmentsApi

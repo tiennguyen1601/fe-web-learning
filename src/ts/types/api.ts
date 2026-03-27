@@ -1,6 +1,7 @@
 export type UserRole = 'Student' | 'Teacher' | 'Admin'
 export type CourseLevel = 'Beginner' | 'Intermediate' | 'Advanced'
 export type CourseStatus = 'Draft' | 'PendingReview' | 'Published' | 'Archived'
+export type EnrollmentStatus = 'Pending' | 'Approved' | 'Rejected'
 
 export interface UserDto {
   id: string
@@ -86,6 +87,17 @@ export interface MyEnrollmentDto {
   totalLessons: number
   completedLessons: number
   progressPercent: number
+  status: EnrollmentStatus
+  rejectionReason?: string
+  isCompleted: boolean
+}
+
+export interface PendingEnrollmentDto {
+  enrollmentId: string
+  studentId: string
+  studentName: string
+  studentEmail: string
+  enrolledAt: string
 }
 
 export interface ProgressDto {
