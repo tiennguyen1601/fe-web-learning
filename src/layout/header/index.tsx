@@ -6,6 +6,7 @@ import Divider from '@mui/material/Divider'
 import Drawer from '@mui/material/Drawer'
 import authApi from '@/apis/auth.api'
 import { useAuthStore } from '@/hooks'
+import NotificationBell from '@/components/NotificationBell'
 
 const HeaderComponent = () => {
   const { user, clearAuth } = useAuthStore()
@@ -125,6 +126,7 @@ const HeaderComponent = () => {
             <div className="hidden md:flex items-center gap-3 ml-auto">
               {user ? (
                 <>
+                  <NotificationBell />
                   <button
                     onClick={(e) => setAnchorEl(e.currentTarget)}
                     className="flex items-center gap-2.5 pl-1 pr-3 py-1 rounded-full border border-gray-200 hover:border-gray-300 hover:shadow-sm transition-all bg-white"
