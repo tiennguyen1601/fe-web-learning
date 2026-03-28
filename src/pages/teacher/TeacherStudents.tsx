@@ -44,6 +44,7 @@ const QuizAnswersDetail = ({ score }: { score: StudentScoreDto }) => {
   if (!score.quizAnswers || score.quizAnswers.length === 0) return null
 
   const total = score.quizAnswers.length
+  const correct = score.quizAnswers.filter((a) => a.isCorrect).length
 
   return (
     <Accordion
@@ -55,9 +56,9 @@ const QuizAnswersDetail = ({ score }: { score: StudentScoreDto }) => {
           <QuizIcon sx={{ color: '#4f46e5', fontSize: 18 }} />
           <Typography variant="body2" fontWeight={600}>{score.assignmentTitle}</Typography>
           <Chip
-            label={`${total} câu`}
+            label={`${correct}/${total} đúng`}
             size="small"
-            color="default"
+            color={correct === total ? 'success' : correct >= total / 2 ? 'warning' : 'error'}
             sx={{ fontSize: 11 }}
           />
           {score.score != null && (
@@ -76,22 +77,33 @@ const QuizAnswersDetail = ({ score }: { score: StudentScoreDto }) => {
               px={1.5} py={1}
               sx={{
                 borderRadius: 1.5,
-                bgcolor: '#f9fafb',
-                border: '1px solid #e5e7eb',
+                bgcolor: a.isCorrect ? '#f0fdf4' : '#fff1f2',
+                border: `1px solid ${a.isCorrect ? '#bbf7d0' : '#fecdd3'}`,
               }}
             >
               <Box flex={1}>
                 <Typography variant="body2" fontWeight={600} mb={0.5}>
                   Câu {idx + 1}: {a.questionText}
                 </Typography>
-                <Box display="flex" alignItems="center" gap={0.5}>
+                <Box display="flex" alignItems="center" gap={0.5} flexWrap="wrap">
                   <Typography variant="caption" color="text.secondary">Trả lời:</Typography>
                   <Chip
                     label={a.selectedOption}
                     size="small"
-                    color="default"
+                    color={a.isCorrect ? 'success' : 'error'}
                     sx={{ fontSize: 11, height: 20, fontWeight: 700 }}
                   />
+                  {!a.isCorrect && a.correctOption && (
+                    <>
+                      <Typography variant="caption" color="text.secondary">· Đáp án đúng:</Typography>
+                      <Chip
+                        label={a.correctOption}
+                        size="small"
+                        color="success"
+                        sx={{ fontSize: 11, height: 20, fontWeight: 700 }}
+                      />
+                    </>
+                  )}
                 </Box>
               </Box>
             </Box>
