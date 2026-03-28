@@ -26,8 +26,6 @@ import Divider from '@mui/material/Divider'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import ScoreIcon from '@mui/icons-material/Score'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
-import CheckCircleIcon from '@mui/icons-material/CheckCircle'
-import CancelIcon from '@mui/icons-material/Cancel'
 import QuizIcon from '@mui/icons-material/Quiz'
 import toast from 'react-hot-toast'
 import coursesApi, { type CourseStudentDto, type StudentScoreDto } from '@/apis/courses.api'
@@ -45,7 +43,6 @@ const typeLabel: Record<string, string> = {
 const QuizAnswersDetail = ({ score }: { score: StudentScoreDto }) => {
   if (!score.quizAnswers || score.quizAnswers.length === 0) return null
 
-  const correct = score.quizAnswers.filter((a) => a.isCorrect).length
   const total = score.quizAnswers.length
 
   return (
@@ -58,9 +55,9 @@ const QuizAnswersDetail = ({ score }: { score: StudentScoreDto }) => {
           <QuizIcon sx={{ color: '#4f46e5', fontSize: 18 }} />
           <Typography variant="body2" fontWeight={600}>{score.assignmentTitle}</Typography>
           <Chip
-            label={`${correct}/${total} đúng`}
+            label={`${total} câu`}
             size="small"
-            color={correct === total ? 'success' : correct >= total / 2 ? 'warning' : 'error'}
+            color="default"
             sx={{ fontSize: 11 }}
           />
           {score.score != null && (
@@ -79,42 +76,22 @@ const QuizAnswersDetail = ({ score }: { score: StudentScoreDto }) => {
               px={1.5} py={1}
               sx={{
                 borderRadius: 1.5,
-                bgcolor: a.isCorrect ? '#f0fdf4' : '#fef2f2',
-                border: '1px solid',
-                borderColor: a.isCorrect ? '#bbf7d0' : '#fecaca',
+                bgcolor: '#f9fafb',
+                border: '1px solid #e5e7eb',
               }}
             >
-              <Box display="flex" alignItems="flex-start" gap={1}>
-                {a.isCorrect
-                  ? <CheckCircleIcon sx={{ color: '#16a34a', fontSize: 18, mt: 0.2, flexShrink: 0 }} />
-                  : <CancelIcon sx={{ color: '#dc2626', fontSize: 18, mt: 0.2, flexShrink: 0 }} />
-                }
-                <Box flex={1}>
-                  <Typography variant="body2" fontWeight={600} mb={0.5}>
-                    Câu {idx + 1}: {a.questionText}
-                  </Typography>
-                  <Box display="flex" gap={2} flexWrap="wrap">
-                    <Box display="flex" alignItems="center" gap={0.5}>
-                      <Typography variant="caption" color="text.secondary">Trả lời:</Typography>
-                      <Chip
-                        label={a.selectedOption}
-                        size="small"
-                        color={a.isCorrect ? 'success' : 'error'}
-                        sx={{ fontSize: 11, height: 20, fontWeight: 700 }}
-                      />
-                    </Box>
-                    {!a.isCorrect && (
-                      <Box display="flex" alignItems="center" gap={0.5}>
-                        <Typography variant="caption" color="text.secondary">Đáp án đúng:</Typography>
-                        <Chip
-                          label={a.correctOption}
-                          size="small"
-                          color="success"
-                          sx={{ fontSize: 11, height: 20, fontWeight: 700 }}
-                        />
-                      </Box>
-                    )}
-                  </Box>
+              <Box flex={1}>
+                <Typography variant="body2" fontWeight={600} mb={0.5}>
+                  Câu {idx + 1}: {a.questionText}
+                </Typography>
+                <Box display="flex" alignItems="center" gap={0.5}>
+                  <Typography variant="caption" color="text.secondary">Trả lời:</Typography>
+                  <Chip
+                    label={a.selectedOption}
+                    size="small"
+                    color="default"
+                    sx={{ fontSize: 11, height: 20, fontWeight: 700 }}
+                  />
                 </Box>
               </Box>
             </Box>

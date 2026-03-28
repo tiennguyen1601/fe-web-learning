@@ -38,6 +38,9 @@ const QuizResult: FC<{ submission: SubmissionDto; maxScore: number }> = ({ submi
       <Typography variant="h6">
         Điểm của bạn: {submission.score} / {maxScore}
       </Typography>
+      <Typography variant="body2" sx={{ mt: 0.5, opacity: 0.85 }}>
+        Bài đã được chấm. Kết quả chi tiết không được hiển thị.
+      </Typography>
     </Alert>
 
     {submission.quizAnswers.map((a, i) => (
@@ -48,16 +51,15 @@ const QuizResult: FC<{ submission: SubmissionDto; maxScore: number }> = ({ submi
           p: 2,
           borderRadius: 2,
           border: '1px solid',
-          borderColor: a.isCorrect ? 'success.light' : 'error.light',
-          bgcolor: a.isCorrect ? 'success.50' : 'error.50',
+          borderColor: 'grey.200',
+          bgcolor: 'grey.50',
         }}
       >
         <Typography fontWeight={600} sx={{ mb: 1 }}>
           Câu {i + 1}: {a.questionText}
         </Typography>
-        <Typography color={a.isCorrect ? 'success.main' : 'error.main'}>
-          Bạn chọn: <strong>{a.selectedOption}</strong>{' '}
-          {a.isCorrect ? '✓ Đúng' : `✗ Sai — Đáp án đúng: ${a.correctOption}`}
+        <Typography color="text.secondary">
+          Bạn đã chọn: <strong>{a.selectedOption}</strong>
         </Typography>
       </Box>
     ))}

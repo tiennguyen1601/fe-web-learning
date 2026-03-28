@@ -196,7 +196,7 @@ const CourseDetail = () => {
       </div>
 
       {/* Main content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 pb-24 lg:pb-8">
         <div className="flex flex-col lg:flex-row gap-8">
 
           {/* Left column */}
@@ -651,6 +651,51 @@ const CourseDetail = () => {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Mobile sticky bottom CTA */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-100 px-4 py-3 shadow-lg">
+        {isEnrolled ? (
+          sorted.length > 0 ? (
+            <button
+              onClick={() => navigate(`/learn/${id}/lesson/${sorted[0].id}`)}
+              className="w-full py-3 rounded-xl font-bold text-sm text-white"
+              style={{ background: 'linear-gradient(135deg, #4f46e5, #7c3aed)' }}
+            >
+              Tiếp tục học →
+            </button>
+          ) : (
+            <button disabled className="w-full py-3 rounded-xl font-bold text-sm text-gray-400 bg-gray-100 cursor-not-allowed">
+              Chưa có bài học
+            </button>
+          )
+        ) : isPending ? (
+          <div className="w-full py-3 rounded-xl bg-amber-50 border border-amber-200 text-center">
+            <span className="text-amber-700 font-semibold text-sm">⏳ Đang chờ giáo viên duyệt</span>
+          </div>
+        ) : isRejected ? (
+          <div className="flex items-center gap-2">
+            <div className="flex-1 py-2.5 rounded-xl bg-red-50 border border-red-200 text-center">
+              <span className="text-red-600 font-semibold text-xs">✗ Bị từ chối</span>
+            </div>
+            <button
+              onClick={() => { if (!user) navigate('/login'); else enroll() }}
+              className="flex-1 py-3 rounded-xl font-bold text-sm text-white"
+              style={{ background: 'linear-gradient(135deg, #4f46e5, #7c3aed)' }}
+            >
+              Đăng ký lại
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={() => { if (!user) navigate('/login', { state: { from: { pathname: `/courses/${id}` } } }); else enroll() }}
+            disabled={isEnrolling}
+            className="w-full py-3 rounded-xl font-bold text-sm text-white disabled:opacity-60"
+            style={{ background: 'linear-gradient(135deg, #4f46e5, #7c3aed)' }}
+          >
+            {isEnrolling ? 'Đang xử lý...' : course.isFree ? 'Đăng ký miễn phí' : 'Đăng ký ngay'}
+          </button>
+        )}
       </div>
     </div>
   )
