@@ -182,7 +182,8 @@ const ScoresDialog = ({
                     Bài tập khác
                   </Typography>
                 )}
-                <Table size="small">
+                <TableContainer sx={{ overflowX: 'auto' }}>
+                  <Table size="small" sx={{ minWidth: 500 }}>
                   <TableHead>
                     <TableRow>
                       <TableCell sx={{ fontWeight: 700 }}>Bài tập</TableCell>
@@ -223,7 +224,8 @@ const ScoresDialog = ({
                       </TableRow>
                     ))}
                   </TableBody>
-                </Table>
+                  </Table>
+                </TableContainer>
               </Box>
             )}
           </>
@@ -336,8 +338,8 @@ const TeacherStudents = () => {
               <Typography color="text.secondary">Chưa có học viên nào đăng ký khóa học này.</Typography>
             </Box>
           ) : (
-            <TableContainer component={Paper} sx={{ borderRadius: 3, border: '1px solid #e5e7eb' }}>
-              <Table>
+            <TableContainer component={Paper} sx={{ borderRadius: 3, border: '1px solid #e5e7eb', overflowX: 'auto' }}>
+              <Table sx={{ minWidth: 600 }}>
                 <TableHead>
                   <TableRow sx={{ background: 'linear-gradient(135deg,#eef2ff,#f5f3ff)' }}>
                     {['Học viên', 'Email', 'Ngày đăng ký', 'Tiến độ', 'Trạng thái', 'Điểm số'].map((h) => (
