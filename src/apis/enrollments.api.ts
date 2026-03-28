@@ -1,6 +1,15 @@
 import axiosClient from './axios-client'
 import type { MyEnrollmentDto, ProgressDto, PagedResult, PendingEnrollmentDto } from '@/ts/types/api'
 
+export interface CertificateDto {
+  studentName: string
+  courseTitle: string
+  teacherName: string
+  categoryName: string
+  completedAt: string
+  enrollmentId: string
+}
+
 const enrollmentsApi = {
   enroll: (courseId: string): Promise<{ id: string }> =>
     axiosClient.post('/enrollments', { courseId }),
@@ -22,6 +31,9 @@ const enrollmentsApi = {
 
   getPending: (courseId: string): Promise<PendingEnrollmentDto[]> =>
     axiosClient.get(`/courses/${courseId}/enrollments/pending`),
+
+  getCertificate: (enrollmentId: string): Promise<CertificateDto> =>
+    axiosClient.get(`/enrollments/${enrollmentId}/certificate`),
 }
 
 export default enrollmentsApi

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Link, useNavigate } from 'react-router-dom'
+import CertificateModal from './CertificateModal'
 import Grid from '@mui/material/Grid'
 import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
@@ -21,11 +22,18 @@ const MyLearning = () => {
   const navigate = useNavigate()
 
   const [tab, setTab] = useState<'approved' | 'pending' | 'rejected'>('approved')
+  const [certEnrollmentId, setCertEnrollmentId] = useState<string | null>(null)
 
   const { data: enrollments, isLoading, isError, refetch } = useQuery({
     queryKey: ['enrollments', 'my'],
     queryFn: () => enrollmentsApi.getMyEnrollments({ pageSize: 50 }),
     enabled: isStudent,
+  })
+
+  const { data: certData } = useQuery({
+    queryKey: ['certificate', certEnrollmentId],
+    queryFn: () => enrollmentsApi.getCertificate(certEnrollmentId!),
+    enabled: !!certEnrollmentId,
   })
 
   if (isLoading) return <PageLoader />
@@ -87,7 +95,12 @@ const MyLearning = () => {
                       alt={e.courseTitle}
                     />
                     <CardContent sx={{ flexGrow: 1 }}>
-                      <Typography variant="subtitle1" fontWeight={600} noWrap gutterBottom>{e.courseTitle}</Typography>
+                      <Box display="flex" alignItems="flex-start" justifyContent="space-between" gap={1}>
+                        <Typography variant="subtitle1" fontWeight={600} noWrap gutterBottom sx={{ flex: 1 }}>{e.courseTitle}</Typography>
+                        {e.isCompleted && (
+                          <span className="flex-shrink-0 px-2 py-0.5 text-xs font-semibold bg-green-100 text-green-700 rounded-full">✓ Hoàn thành</span>
+                        )}
+                      </Box>
                       <Typography variant="body2" color="text.secondary" gutterBottom>{e.teacherName}</Typography>
                       <Box mt={2}>
                         <Box display="flex" justifyContent="space-between" mb={0.5}>
@@ -108,6 +121,14 @@ const MyLearning = () => {
                       >
                         {e.progressPercent === 0 ? 'Bắt đầu học' : e.progressPercent === 100 ? 'Xem lại' : 'Tiếp tục học'}
                       </GradientButton>
+                      {e.isCompleted && (
+                        <button
+                          onClick={() => setCertEnrollmentId(e.enrollmentId)}
+                          className="w-full mt-2 px-4 py-2 rounded-xl text-sm font-semibold text-indigo-600 border border-indigo-200 hover:bg-indigo-50"
+                        >
+                          Xem chứng chỉ
+                        </button>
+                      )}
                     </CardContent>
                   </Card>
                 </Grid>
@@ -169,6 +190,10 @@ const MyLearning = () => {
           </div>
         )}
       </Container>
+
+      {certData && (
+        <CertificateModal cert={certData} onClose={() => setCertEnrollmentId(null)} />
+      )}
     </Box>
   )
 }
