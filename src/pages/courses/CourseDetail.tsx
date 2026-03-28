@@ -1,10 +1,11 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
 import coursesApi from '@/apis/courses.api'
 import enrollmentsApi from '@/apis/enrollments.api'
 import assignmentsApi from '@/apis/assignments.api'
+import reviewsApi from '@/apis/reviews.api'
 import { useAuthStore } from '@/hooks'
 import { PageLoader } from '@/components'
 
@@ -20,7 +21,7 @@ const typeLabel = (type: string) => {
   return 'Tả ảnh'
 }
 
-const TABS = ['Tổng quan', 'Chương trình học', 'Bài tập']
+const TABS = ['Tổng quan', 'Chương trình học', 'Bài tập', 'Đánh giá']
 
 const CourseDetail = () => {
   const { id } = useParams<{ id: string }>()
@@ -29,6 +30,9 @@ const CourseDetail = () => {
   const qc = useQueryClient()
   const [tab, setTab] = useState(0)
   const [imgError, setImgError] = useState(false)
+
+  const [starRating, setStarRating] = useState(0)
+  const [comment, setComment] = useState('')
 
   const { data: course, isLoading, isError } = useQuery({
     queryKey: ['courses', id],
@@ -52,6 +56,33 @@ const CourseDetail = () => {
   const isEnrolled = myEnrollment?.status === 'Approved'
   const isPending = myEnrollment?.status === 'Pending'
   const isRejected = myEnrollment?.status === 'Rejected'
+
+  const { data: reviews } = useQuery({
+    queryKey: ['reviews', id],
+    queryFn: () => reviewsApi.getAll(id!),
+  })
+
+  const { data: myReview } = useQuery({
+    queryKey: ['my-review', id],
+    queryFn: () => reviewsApi.getMy(id!),
+    enabled: isEnrolled,
+  })
+
+  const { mutate: submitReview, isPending: isSubmitting } = useMutation({
+    mutationFn: () => reviewsApi.upsert(id!, starRating, comment || undefined),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['reviews', id] })
+      qc.invalidateQueries({ queryKey: ['my-review', id] })
+      qc.invalidateQueries({ queryKey: ['courses'] })
+    },
+  })
+
+  useEffect(() => {
+    if (myReview) {
+      setStarRating(myReview.rating)
+      setComment(myReview.comment ?? '')
+    }
+  }, [myReview])
 
   const { mutate: enroll, isPending: isEnrolling } = useMutation({
     mutationFn: () => enrollmentsApi.enroll(id!),
@@ -368,6 +399,85 @@ const CourseDetail = () => {
                         ))}
                       </div>
                     )}
+                  </motion.div>
+                )}
+
+                {/* Reviews */}
+                {tab === 3 && (
+                  <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25 }}>
+                    <div className="space-y-6">
+                      {/* Rating summary */}
+                      <div className="flex items-center gap-4 p-4 bg-amber-50 rounded-2xl">
+                        <div className="text-center">
+                          <div className="text-4xl font-black text-amber-500">{course.averageRating?.toFixed(1) ?? '—'}</div>
+                          <div className="text-xs text-gray-500 mt-1">{course.reviewCount ?? 0} đánh giá</div>
+                        </div>
+                        <div className="flex text-amber-400 text-xl">
+                          {[1,2,3,4,5].map(s => (
+                            <span key={s}>{s <= Math.round(course.averageRating ?? 0) ? '★' : '☆'}</span>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Write review (only if approved student) */}
+                      {isEnrolled && (
+                        <div className="bg-white rounded-2xl border border-gray-100 p-5">
+                          <p className="font-semibold text-gray-900 mb-3">
+                            {myReview ? 'Cập nhật đánh giá của bạn' : 'Đánh giá khóa học'}
+                          </p>
+                          <div className="flex gap-1 mb-3">
+                            {[1,2,3,4,5].map((s) => (
+                              <button key={s} onClick={() => setStarRating(s)} type="button">
+                                <svg className={`w-7 h-7 ${s <= starRating ? 'text-amber-400' : 'text-gray-200'} hover:text-amber-300 transition-colors`}
+                                  viewBox="0 0 20 20" fill="currentColor">
+                                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                </svg>
+                              </button>
+                            ))}
+                          </div>
+                          <textarea
+                            value={comment}
+                            onChange={(e) => setComment(e.target.value)}
+                            placeholder="Nhận xét của bạn về khóa học..."
+                            className="w-full border border-gray-200 rounded-xl p-3 text-sm resize-none h-20 focus:outline-none focus:ring-2 focus:ring-indigo-300"
+                          />
+                          <button
+                            onClick={() => submitReview()}
+                            disabled={starRating === 0 || isSubmitting}
+                            className="mt-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white disabled:opacity-50"
+                            style={{ background: 'linear-gradient(135deg, #4f46e5, #7c3aed)' }}
+                          >
+                            {isSubmitting ? 'Đang gửi...' : myReview ? 'Cập nhật' : 'Gửi đánh giá'}
+                          </button>
+                        </div>
+                      )}
+
+                      {/* Review list */}
+                      <div className="space-y-4">
+                        {reviews?.items.length === 0 && (
+                          <p className="text-center text-gray-400 py-8">Chưa có đánh giá nào</p>
+                        )}
+                        {reviews?.items.map((r, i) => (
+                          <div key={i} className="bg-white rounded-2xl border border-gray-100 p-4">
+                            <div className="flex items-center gap-2 mb-2">
+                              <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-sm">
+                                {r.studentName[0]}
+                              </div>
+                              <div>
+                                <p className="text-sm font-semibold text-gray-900">{r.studentName}</p>
+                                <div className="flex text-amber-400 text-xs">
+                                  {'★'.repeat(r.rating)}{'☆'.repeat(5 - r.rating)}
+                                </div>
+                              </div>
+                              <span className="ml-auto text-xs text-gray-400">
+                                {new Date(r.createdAt).toLocaleDateString('vi-VN')}
+                              </span>
+                            </div>
+                            {r.comment && <p className="text-sm text-gray-600">{r.comment}</p>}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   </motion.div>
                 )}
               </div>

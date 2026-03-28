@@ -39,6 +39,8 @@ export interface CourseListDto {
   teacherId: string
   teacherName: string
   createdAt: string
+  averageRating: number
+  reviewCount: number
 }
 
 export interface LessonSummaryDto {
@@ -64,6 +66,8 @@ export interface CourseDetailDto {
   createdAt: string
   updatedAt: string
   lessons: LessonSummaryDto[]
+  averageRating: number
+  reviewCount: number
 }
 
 export interface LessonDto {
