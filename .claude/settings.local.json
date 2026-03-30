@@ -39,7 +39,8 @@
       "Bash(grep \"from ''''@tanstack/react-query''''\" src/features/assignments/hooks/useAssignmentQueries.ts)",
       "Bash(mkdir -p \"d:/FPT/Project/LearningWeb/src/LearningWeb.Application/Reviews/Commands/UpsertReview\")",
       "Bash(mkdir -p \"d:/FPT/Project/LearningWeb/src/LearningWeb.Application/Reviews/Queries/GetReviews\")",
-      "Bash(mkdir -p \"d:/FPT/Project/LearningWeb/src/LearningWeb.Application/Reviews/Queries/GetMyReview\")"
+      "Bash(mkdir -p \"d:/FPT/Project/LearningWeb/src/LearningWeb.Application/Reviews/Queries/GetMyReview\")",
+      "Bash(grep -n \"correctOption\\\\|isCorrect\" /d/FPT/Project/WebLearning/src/pages/teacher/*.tsx)"
     ],
     "additionalDirectories": [
       "d:\\FPT\\Project\\LearningWeb\\src\\LearningWeb.Application\\Assignments\\Queries\\GetMyAssignments",
@@ -62,7 +63,9 @@
       "d:\\FPT\\Project\\LearningWeb\\src\\LearningWeb.Application\\Notifications\\Queries\\GetNotifications",
       "d:\\FPT\\Project\\LearningWeb\\src\\LearningWeb.Application\\Notifications\\Commands\\MarkAllRead",
       "d:\\FPT\\Project\\LearningWeb\\src\\LearningWeb.Application\\Reviews\\Commands\\UpsertReview",
-      "d:\\FPT\\Project\\LearningWeb\\src\\LearningWeb.Application\\Reviews\\Queries\\GetReviews"
+      "d:\\FPT\\Project\\LearningWeb\\src\\LearningWeb.Application\\Reviews\\Queries\\GetReviews",
+      "d:\\FPT\\Project\\LearningWeb\\src\\LearningWeb.Application\\Reviews\\Queries\\GetMyReview",
+      "d:\\FPT\\Project\\LearningWeb\\src\\LearningWeb.Application\\Enrollments\\Queries"
     ]
   }
 }
